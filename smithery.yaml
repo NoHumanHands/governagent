@@ -1,0 +1,24 @@
+# Configuración para Smithery.ai
+name: governagent
+version: 1.0.0
+description: "Proxy MCP con pagos automáticos HTTP 402 para optimización SQL y auditoría. Monetiza tu servidor MCP fácilmente."
+
+author: Antigravity User
+repository: https://github.com/tu-usuario/governagent
+
+commands:
+  start:
+    command: node
+    args:
+      - dist/index.js
+    env:
+      PORT: 3000
+
+pricing:
+  model: pay-per-use
+  default_price: 0.01 # USD por llamada
+  currency: USD
+  tools:
+    optimize-sql: 0.01
+    audit-logs: 0.05
+    generate-report: 0.25
