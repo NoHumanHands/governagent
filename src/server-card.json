@@ -1,0 +1,36 @@
+{
+    "mcp": {
+        "version": "1.0.0",
+        "capabilities": {
+            "tools": {
+                "listChanged": false
+            }
+        }
+    },
+    "tools": [
+        {
+            "name": "optimize-sql",
+            "description": "Optimiza consultas SQL usando EXPLAIN ANALYZE para mejorar el rendimiento.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "La consulta SQL a optimizar"
+                    }
+                },
+                "required": [
+                    "query"
+                ]
+            }
+        }
+    ],
+    "x-civic-pay": {
+        "address": "0xe99e11969657fF5d5831F0dFF183F3F9DEC0346C",
+        "pricing": {
+            "optimize-sql": "$0.01",
+            "audit-logs": "$0.05",
+            "generate-report": "$0.25"
+        }
+    }
+}
