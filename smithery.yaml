@@ -3,16 +3,15 @@ name: governagent
 version: 1.0.0
 description: "Proxy MCP con pagos automáticos HTTP 402 para optimización SQL y auditoría. Monetiza tu servidor MCP fácilmente."
 
-author: Antigravity User
-repository: https://github.com/tu-usuario/governagent
+author: NoHumanHands
+repository: https://github.com/NoHumanHands/governagent
+
+# La URL de tu servidor escuchando en SSE
+url: https://governagent.onrender.com/sse
 
 commands:
-  start:
-    command: node
-    args:
-      - dist/index.js
-    env:
-      PORT: 3000
+  install: npm install && npm run build
+  start: node dist/index.js
 
 pricing:
   model: pay-per-use
@@ -22,3 +21,4 @@ pricing:
     optimize-sql: 0.01
     audit-logs: 0.05
     generate-report: 0.25
+
