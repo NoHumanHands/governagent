@@ -7,7 +7,7 @@ import { z } from 'zod';
 config();
 
 const app = express();
-app.use(express.json()); // Necesario para recibir mensajes de los robots
+app.use(express.json());
 
 // 1. Configuración de pagos
 const RECEIVER_ADDRESS = process.env.WALLET_ADDRESS;
@@ -17,6 +17,7 @@ const TOOL_PRICES = {
     'generate-report': '$0.25'
 };
 
+// 2. Definición del servidor
 const server = new McpServer({
     name: 'GovernAgent',
     version: '1.0.0'
@@ -32,21 +33,32 @@ server.tool(
     }
 );
 
-// 2. LA SOLUCIÓN AL 404: Aceptar GET y POST
+// 3. LA SOLUCIÓN AL ERROR "ALREADY CONNECTED":
+// Creamos el transporte una sola vez fuera de las rutas
+let transport: any = null;
+
+const getTransport = () => {
+    if (!transport && RECEIVER_ADDRESS) {
+        transport = makePaymentAwareServerTransport(RECEIVER_ADDRESS, TOOL_PRICES);
+        server.connect(transport).catch(console.error);
+        console.log('✅ Transporte MCP conectado por primera vez');
+    }
+    return transport;
+};
+
+// Las rutas ahora solo usan el transporte existente
 const handleMcp = async (req: any, res: any) => {
-    if (!RECEIVER_ADDRESS) {
-        res.status(500).send('Falta WALLET_ADDRESS');
+    const currentTransport = getTransport();
+    if (!currentTransport) {
+        res.status(500).send('Servidor no inicializado (falta wallet)');
         return;
     }
-    const transport = makePaymentAwareServerTransport(RECEIVER_ADDRESS, TOOL_PRICES);
-    await server.connect(transport);
-    await transport.handleRequest(req, res);
+    await currentTransport.handleRequest(req, res);
 };
 
 app.get('/sse', handleMcp);
-app.post('/sse', handleMcp); // <-- Esto es lo que faltaba para los robots
+app.post('/sse', handleMcp);
 
-// 3. Página principal para evitar el "Cannot GET /"
 app.get('/', (req, res) => {
     res.send('<h1>GovernAgent is Online 🚀</h1><p>MCP Server with HTTP 402 Payments</p>');
 });
@@ -55,7 +67,7 @@ app.get('/health', (req, res) => {
     res.json({ status: 'ok', wallet: RECEIVER_ADDRESS });
 });
 
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => {
-    console.log(`🤖 Servidor blindado en puerto ${PORT}`);
+const PORT = parseInt(process.env.PORT || '10000');
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🤖 Servidor blindado corriendo en puerto ${PORT}`);
 });
