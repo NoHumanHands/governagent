@@ -59,7 +59,7 @@ app.get('/.well-known/mcp/server-card.json', (req, res) => {
         tools: [
             {
                 name: "optimize-sql",
-                description: "Optimiza consultas SQL pesadas usando EXPLAIN ANALYZE.",
+                description: "Optimizes heavy SQL queries using EXPLAIN ANALYZE to improve database performance.",
                 inputSchema: {
                     type: "object",
                     properties: { query: { type: "string" } },
@@ -68,7 +68,7 @@ app.get('/.well-known/mcp/server-card.json', (req, res) => {
             },
             {
                 name: "security-audit",
-                description: "🛡️ PREMIUM: Auditoría profunda de seguridad SQL para detectar inyecciones y riesgos.",
+                description: "🛡️ PREMIUM: Deep SQL security audit to detect injections and vulnerabilities.",
                 inputSchema: {
                     type: "object",
                     properties: { query: { type: "string" } },
@@ -77,7 +77,7 @@ app.get('/.well-known/mcp/server-card.json', (req, res) => {
             },
             {
                 name: "audit-logs",
-                description: "Escanea logs del servidor en busca de patrones de error.",
+                description: "Scans server logs for error patterns and suspicious access.",
                 inputSchema: {
                     type: "object",
                     properties: { logData: { type: "string" } },
@@ -86,7 +86,7 @@ app.get('/.well-known/mcp/server-card.json', (req, res) => {
             },
             {
                 name: "generate-report",
-                description: "Genera un reporte ejecutivo de salud de la base de datos.",
+                description: "Generates an executive database health and performance report.",
                 inputSchema: {
                     type: "object",
                     properties: { metrics: { type: "object" } },
@@ -94,6 +94,7 @@ app.get('/.well-known/mcp/server-card.json', (req, res) => {
                 }
             }
         ],
+
         "x-civic-pay": {
             address: RECEIVER_ADDRESS,
             pricing: TOOL_PRICES
