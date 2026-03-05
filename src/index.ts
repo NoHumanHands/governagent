@@ -105,6 +105,8 @@ const handleConnection = async (req: any, res: any) => {
 app.get('/.well-known/mcp/server-card.json', (req, res) => {
     res.json({
         mcp: { version: "1.0.0" },
+        logoUrl: "https://governagent.onrender.com/logo.png",
+        icon: "https://governagent.onrender.com/logo.png",
         tools: [
             {
                 name: "optimize-sql",
