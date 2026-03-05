@@ -172,27 +172,28 @@ app.get('/dashboard', async (req, res) => {
                         .balance { font-size: 3rem; font-weight: bold; margin: 20px 0; color: #f8fafc; }
                         .meta { color: #94a3b8; font-size: 1.1rem; }
                         .progress-bar { background: #334155; border-radius: 10px; height: 20px; width: 300px; margin: 20px auto; overflow: hidden; }
-                        .progress-fill { background: linear-gradient(90deg, #38bdf8, #818cf8); height: 100%; width: \${Math.min((parseFloat(ethBalance) / 0.002) * 100, 100)}%; transition: width 1s ease-in-out; }
+                        .progress-fill { background: linear-gradient(90deg, #38bdf8, #818cf8); height: 100%; width: ${Math.min((parseFloat(ethBalance) / 0.002) * 100, 100)}%; transition: width 1s ease-in-out; }
                         .tool-list { text-align: left; margin-top: 20px; }
                         .tag { background: #0ea5e9; padding: 2px 8px; border-radius: 5px; font-size: 0.8rem; margin-right: 5px; }
                     </style>
                 </head>
                 <body>
                     <div class="card">
-                        <p class="meta">GOVERNAGENT v10.0</p>
+                        <p class="meta">GOVERNAGENT v11.0</p>
                         <h1>Revenue Dashboard</h1>
-                        <div class="balance">\${parseFloat(ethBalance).toFixed(6)} <span style="font-size: 1rem; color: #94a3b8;">bsETH</span></div>
+                        <div class="balance">${parseFloat(ethBalance).toFixed(6)} <span style="font-size: 1rem; color: #94a3b8;">bsETH</span></div>
                         <p class="meta">Target: $5.00 / day</p>
                         <div class="progress-bar"><div class="progress-fill"></div></div>
                         <div class="tool-list">
                             <p><span class="tag">$0.50</span> Premium Security Audit: 🟢 Active</p>
                             <p><span class="tag">$0.01</span> SQL Optimization: 🟢 Active</p>
                         </div>
-                        <p style="margin-top: 20px; font-size: 0.8rem; color: #64748b;">Wallet: \${RECEIVER_ADDRESS}</p>
+                        <p style="margin-top: 20px; font-size: 0.8rem; color: #64748b;">Wallet: ${RECEIVER_ADDRESS}</p>
                     </div>
                 </body>
             </html>
         `);
+
     } catch (error) {
         res.status(500).send("Error fetching blockchain data");
     }
