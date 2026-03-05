@@ -207,5 +207,5 @@ app.get('/', (req, res) => {
 
 const PORT = parseInt(process.env.PORT || '10000');
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🤖 GoverAgent v9.0 (Gemini Powered) listo en puerto ${PORT}`);
+    console.log(`🤖 GoverAgent v13.0 (Gemini Powered) listo en puerto ${PORT}`);
 });
