@@ -15,6 +15,7 @@ config();
 
 const app = express();
 app.use(express.json());
+app.use(express.static('public')); // Servir el logo y otros estáticos
 
 const RECEIVER_ADDRESS = process.env.WALLET_ADDRESS;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyDTsNK9Y7vPcecZTCTOpmbCCwEZT-YhKYc';
@@ -179,7 +180,8 @@ app.get('/dashboard', async (req, res) => {
                 </head>
                 <body>
                     <div class="card">
-                        <p class="meta">GOVERNAGENT v11.0</p>
+                        <img src="/logo.png" alt="GovernAgent Logo" style="width: 100px; height: 100px; border-radius: 50%; border: 2px solid #ffffff; box-shadow: 0 0 20px rgba(255,255,255,0.3); margin-bottom: 15px;">
+                        <p class="meta">GOVERNAGENT v13.0</p>
                         <h1>Revenue Dashboard</h1>
                         <div class="balance">${parseFloat(ethBalance).toFixed(6)} <span style="font-size: 1rem; color: #94a3b8;">bsETH</span></div>
                         <p class="meta">Target: $5.00 / day</p>
@@ -200,7 +202,7 @@ app.get('/dashboard', async (req, res) => {
 });
 
 app.get('/', (req, res) => {
-    res.send('<h1>GovernAgent (v11.0) 🧠</h1><p>Mission Critical stability ACTIVE. Visit <a href="/dashboard" style="color:#38bdf8">/dashboard</a> to see earnings.</p>');
+    res.send('<h1>GovernAgent (v13.0) 🧠</h1><div style="text-align:center"><img src="/logo.png" style="width:150px; border-radius:50%; box-shadow: 0 0 30px rgba(255,255,255,0.2); margin-top:20px;"></div><p>Intelligent MCP Server Live. Visit <a href="/dashboard" style="color:#38bdf8">/dashboard</a> to see earnings.</p>');
 });
 
 const PORT = parseInt(process.env.PORT || '10000');
