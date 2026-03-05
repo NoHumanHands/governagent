@@ -1,7 +1,7 @@
 # Configuración para Smithery.ai
 name: governagent
 version: 1.0.0
-description: "Proxy MCP con pagos automáticos HTTP 402 para optimización SQL y auditoría de seguridad premium."
+description: "MCP Proxy with automatic HTTP 402 payments for SQL optimization and premium security auditing. Monetize your MCP server easily."
 
 author: NoHumanHands
 repository: https://github.com/NoHumanHands/governagent

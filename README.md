@@ -1,57 +1,52 @@
-# 🤖 GovernAgent - Proxy MCP con Pagos HTTP 402
+# 🤖 GovernAgent - MCP Proxy with HTTP 402 Payments
 
-¡Bienvenido a **GovernAgent**! El primer proxy MCP diseñado para optimizar consultas SQL y generar ingresos automáticos mediante el protocolo **HTTP 402 (Payment Required)**.
+Welcome to **GovernAgent**! The first MCP proxy designed to optimize SQL queries and generate automated revenue using the **HTTP 402 (Payment Required)** protocol.
 
-## 🚀 ¿Qué es?
-GovernAgent actúa como un puente entre agentes de IA (como Claude o Cursor) y servicios de base de datos. Cada vez que un agente solicita una optimización o auditoría, el sistema gestiona el cobro automáticamente en la red **Base**.
+## 🚀 What is it?
+GovernAgent acts as a bridge between AI agents (like Claude or Cursor) and database services. Every time an agent requests an optimization or security audit, the system manages the payment automatically on the **Base** network.
 
-## 💰 Modelo de Negocio (Pay-per-use)
-| Herramienta | Descripción | Precio (USD) |
+## 💰 Business Model (Pay-per-use)
+| Tool | Description | Price (USD) |
 | :--- | :--- | :--- |
-| `optimize-sql` | Análisis y optimización de queries SQL | **$0.01** |
-| `audit-logs` | Auditoría de logs de seguridad | **$0.05** |
-| `generate-report` | Reportes detallados de rendimiento | **$0.25** |
+| `optimize-sql` | SQL query analysis and optimization | **$0.01** |
+| `security-audit` | 🛡️ PREMIUM: Deep SQL security audit | **$0.50** |
+| `audit-logs` | Security logs audit | **$0.05** |
+| `generate-report` | Detailed performance reports | **$0.25** |
 
 > [!TIP]
-> **Meta:** Alcanzar **$5 USD diarios** con solo 500 llamadas de optimización.
+> **Goal:** Reach **$5 USD daily** with just 10 premium security audits.
 
-## 🔧 Instalación y Despliegue
+## 🔧 Installation and Deployment
 
-### 1. Clonar el repositorio
+### 1. Clone the repository
 ```bash
-git clone https://github.com/tu-usuario/governagent
+git clone https://github.com/NoHumanHands/governagent
 cd governagent
 npm install
 ```
 
-### 2. Configurar Variables de Entorno
-Crea un archivo `.env` basado en el ejemplo:
+### 2. Configure Environment Variables
+Create a `.env` file based on the example:
 ```env
-WALLET_ADDRESS=0xTuDireccionDeWalletEnBase
-PRIVATE_KEY=0xTuPrivateKey
+WALLET_ADDRESS=0xYourWalletAddressOnBase
+PRIVATE_KEY=0xYourPrivateKey
 PORT=3000
+GEMINI_API_KEY=YourGoogleAIKey
 ```
 
-### 3. Ejecutar
+### 3. Run
 ```bash
 npm run dev
 ```
 
-## 🤖 ¿Cómo lo usan los Robots?
-Los agentes de IA pueden conectarse a través de un cliente compatible con x402:
+## 🤖 How do Robots use it?
+AI agents can connect through an x402-compatible client:
 ```bash
-npx @civic/x402-mcp client-proxy --target http://tu-servidor.com:3000/sse
+npx @civic/x402-mcp client-proxy --target https://governagent.onrender.com/sse
 ```
 
-## 📊 Progreso del Proyecto
-- [x] **Día 1**: Preparación y Estructura.
-- [x] **Día 2**: MVP Funcional del Proxy.
-- [x] **Día 3**: Integración de Pagos x402.
-- [x] **Día 4**: Configuración de Smithery y Documentación.
-- [ ] **Día 5**: Registro en Marketplaces y Primeros Usuarios.
-
-## 🛡️ Seguridad
-Este servidor utiliza el SDK oficial del **Model Context Protocol (MCP)** de Anthropic y la integración de **Civic x402**.
+## 🛡️ Security
+This server uses the official **Model Context Protocol (MCP)** SDK from Anthropic and **Civic x402** integration.
 
 ---
-*Hecho por Antigravity para el mundo de los agentes soberanos.*
+*Made by NoHumanHands for the world of sovereign agents.*
