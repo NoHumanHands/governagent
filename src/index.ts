@@ -68,6 +68,26 @@ const handleConnection = async (req: any, res: any) => {
             }
         );
 
+        server.tool(
+            'audit-logs',
+            { logData: z.string().describe('Log data to analyze') },
+            async ({ logData }) => {
+                const prompt = `Analyze these server logs for error patterns or suspicious activity: ${logData}`;
+                const result = await model.generateContent(prompt);
+                return { content: [{ type: 'text', text: `📋 Log Audit Report:\n\n${result.response.text()}` }] };
+            }
+        );
+
+        server.tool(
+            'generate-report',
+            { metrics: z.object({}).describe('Metrics object to summarize') },
+            async ({ metrics }) => {
+                const prompt = `Generate an executive database health report based on these metrics: ${JSON.stringify(metrics)}`;
+                const result = await model.generateContent(prompt);
+                return { content: [{ type: 'text', text: `📊 Executive Report:\n\n${result.response.text()}` }] };
+            }
+        );
+
         // Crear el transporte con cobro
         const transport = makePaymentAwareServerTransport(RECEIVER_ADDRESS, TOOL_PRICES);
 
