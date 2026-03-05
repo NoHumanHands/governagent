@@ -1,24 +1,29 @@
 # Configuración para Smithery.ai
 name: governagent
 version: 1.0.0
-description: "Proxy MCP con pagos automáticos HTTP 402 para optimización SQL y auditoría. Monetiza tu servidor MCP fácilmente."
+description: "Proxy MCP con pagos automáticos HTTP 402 para optimización SQL y auditoría de seguridad premium."
 
 author: NoHumanHands
 repository: https://github.com/NoHumanHands/governagent
 
-# La URL de tu servidor escuchando en SSE
-url: https://governagent.onrender.com/sse
-
 commands:
-  install: npm install && npm run build
-  start: node dist/index.js
+  start:
+    command: node
+    args:
+      - dist/index.js
+    env:
+      PORT: 3000
 
 pricing:
   model: pay-per-use
-  default_price: 0.01 # USD por llamada
   currency: USD
   tools:
     optimize-sql: 0.01
+    security-audit: 0.50
     audit-logs: 0.05
     generate-report: 0.25
 
+# Configuración del servidor remoto (Render)
+deployment:
+  type: remote
+  url: https://governagent.onrender.com/sse
