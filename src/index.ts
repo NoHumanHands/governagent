@@ -3,6 +3,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { makePaymentAwareServerTransport } from '@civic/x402-mcp';
 import { config } from 'dotenv';
 import { z } from 'zod';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -14,6 +15,12 @@ const app = express();
 app.use(express.json());
 
 const RECEIVER_ADDRESS = process.env.WALLET_ADDRESS;
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyDTsNK9Y7vPcecZTCTOpmbCCwEZT-YhKYc';
+
+// Inicializar Gemini
+const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
 const TOOL_PRICES = {
     'optimize-sql': '$0.01',
     'audit-logs': '$0.05',
@@ -26,29 +33,21 @@ const server = new McpServer({ name: 'GovernAgent', version: '1.0.0' });
 
 server.tool(
     'optimize-sql',
-    { query: z.string().describe('SQL a optimizar') },
+    { query: z.string().describe('SQL query to optimize') },
     async ({ query }) => {
-        return { content: [{ type: 'text', text: `🔍 Optimización: EXPLAIN ANALYZE ${query}` }] };
+        const prompt = `You are a database expert. Optimize this SQL query for performance and explain why. Be concise: ${query}`;
+        const result = await model.generateContent(prompt);
+        return { content: [{ type: 'text', text: `🔍 Optimization Report:\n\n${result.response.text()}` }] };
     }
 );
 
 server.tool(
     'security-audit',
-    { query: z.string().describe('Consulta SQL para auditar seguridad') },
+    { query: z.string().describe('SQL query to audit for security') },
     async ({ query }) => {
-        const issues = [];
-        if (query.toLowerCase().includes('drop table')) issues.push('⚠️ Peligro de eliminación de tablas');
-        if (query.toLowerCase().includes('or 1=1')) issues.push('🚨 Posible Inyección SQL detectada');
-        if (query.toLowerCase().includes('--')) issues.push('📝 Comentarios en query podrían ocultar ataques');
-
-        return {
-            content: [{
-                type: 'text',
-                text: issues.length > 0
-                    ? `🛡️ Auditoría de Seguridad: Se encontraron los siguientes problemas:\n- ${issues.join('\n- ')}`
-                    : `✅ Auditoría de Seguridad: No se detectaron patrones de ataque obvios en la consulta.`
-            }]
-        };
+        const prompt = `You are a cybersecurity expert. Perform a deep security audit on this SQL query. Detect SQL injection, sensitive data leaks, or risky patterns. Be professional and concise: ${query}`;
+        const result = await model.generateContent(prompt);
+        return { content: [{ type: 'text', text: `🛡️ PREMIUM Security Audit:\n\n${result.response.text()}` }] };
     }
 );
 
@@ -122,10 +121,10 @@ app.get('/sse', handleConnection);
 app.post('/sse', handleConnection);
 
 app.get('/', (req, res) => {
-    res.send('<h1>GovernAgent (v7.0) 🚀</h1><p>Premium Security Audit tools now available!</p>');
+    res.send('<h1>GovernAgent (v9.0) 🧠</h1><p>Real-time AI Security & Performance Audit ACTIVE.</p>');
 });
 
 const PORT = parseInt(process.env.PORT || '10000');
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🤖 GoverAgent v7.0 listo en puerto ${PORT}`);
+    console.log(`🤖 GoverAgent v9.0 (Gemini Powered) listo en puerto ${PORT}`);
 });
