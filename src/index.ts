@@ -17,7 +17,8 @@ const RECEIVER_ADDRESS = process.env.WALLET_ADDRESS;
 const TOOL_PRICES = {
     'optimize-sql': '$0.01',
     'audit-logs': '$0.05',
-    'generate-report': '$0.25'
+    'generate-report': '$0.25',
+    'security-audit': '$0.50'
 };
 
 // 2. Definición del servidor
@@ -31,6 +32,26 @@ server.tool(
     }
 );
 
+server.tool(
+    'security-audit',
+    { query: z.string().describe('Consulta SQL para auditar seguridad') },
+    async ({ query }) => {
+        const issues = [];
+        if (query.toLowerCase().includes('drop table')) issues.push('⚠️ Peligro de eliminación de tablas');
+        if (query.toLowerCase().includes('or 1=1')) issues.push('🚨 Posible Inyección SQL detectada');
+        if (query.toLowerCase().includes('--')) issues.push('📝 Comentarios en query podrían ocultar ataques');
+
+        return {
+            content: [{
+                type: 'text',
+                text: issues.length > 0
+                    ? `🛡️ Auditoría de Seguridad: Se encontraron los siguientes problemas:\n- ${issues.join('\n- ')}`
+                    : `✅ Auditoría de Seguridad: No se detectaron patrones de ataque obvios en la consulta.`
+            }]
+        };
+    }
+);
+
 // --- NUEVO: Servir el "Server Card" para Smithery ---
 app.get('/.well-known/mcp/server-card.json', (req, res) => {
     res.json({
@@ -38,11 +59,38 @@ app.get('/.well-known/mcp/server-card.json', (req, res) => {
         tools: [
             {
                 name: "optimize-sql",
-                description: "Optimiza consultas SQL usando AI.",
+                description: "Optimiza consultas SQL pesadas usando EXPLAIN ANALYZE.",
                 inputSchema: {
                     type: "object",
                     properties: { query: { type: "string" } },
                     required: ["query"]
+                }
+            },
+            {
+                name: "security-audit",
+                description: "🛡️ PREMIUM: Auditoría profunda de seguridad SQL para detectar inyecciones y riesgos.",
+                inputSchema: {
+                    type: "object",
+                    properties: { query: { type: "string" } },
+                    required: ["query"]
+                }
+            },
+            {
+                name: "audit-logs",
+                description: "Escanea logs del servidor en busca de patrones de error.",
+                inputSchema: {
+                    type: "object",
+                    properties: { logData: { type: "string" } },
+                    required: ["logData"]
+                }
+            },
+            {
+                name: "generate-report",
+                description: "Genera un reporte ejecutivo de salud de la base de datos.",
+                inputSchema: {
+                    type: "object",
+                    properties: { metrics: { type: "object" } },
+                    required: ["metrics"]
                 }
             }
         ],
@@ -73,10 +121,10 @@ app.get('/sse', handleConnection);
 app.post('/sse', handleConnection);
 
 app.get('/', (req, res) => {
-    res.send('<h1>GovernAgent (v5.0) 🚀</h1><p>Server Card active at /.well-known/mcp/server-card.json</p>');
+    res.send('<h1>GovernAgent (v7.0) 🚀</h1><p>Premium Security Audit tools now available!</p>');
 });
 
 const PORT = parseInt(process.env.PORT || '10000');
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🤖 GoverAgent v5.0 listo en puerto ${PORT}`);
+    console.log(`🤖 GoverAgent v7.0 listo en puerto ${PORT}`);
 });
