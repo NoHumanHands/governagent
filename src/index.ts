@@ -10,19 +10,103 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// --- FILTRO CRÍTICO PARA INSPECTOR (STDIO) ---
+// Redirige todo lo que NO sea JSON de stdout a stderr 
+// para evitar el error "Unexpected token 'd' [dotenv...]"
+if (!process.env.PORT) {
+    const originalWrite = process.stdout.write.bind(process.stdout);
+    // @ts-ignore
+    process.stdout.write = (chunk, encoding, callback) => {
+        const str = typeof chunk === 'string' ? chunk : chunk.toString();
+        if (str.trim().startsWith('{') || str.trim().startsWith('[')) {
+            return originalWrite(chunk, encoding, callback);
+        }
+        return process.stderr.write(chunk, encoding, callback);
+    };
+}
+
 config();
+
+// Función para generar contenido con fallback de modelos
+async function generateWithFallback(prompt: string) {
+    const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"];
+    let lastError = null;
+
+    for (const modelName of modelsToTry) {
+        try {
+            const currentModel = genAI.getGenerativeModel({ model: modelName });
+            const result = await currentModel.generateContent(prompt);
+            return result.response.text();
+        } catch (err: any) {
+            lastError = err;
+            console.error(`❌ Falló modelo ${modelName}: ${err.message}`);
+        }
+    }
+    throw new Error(`Ningún modelo de Gemini respondió. Último error: ${lastError?.message}`);
+}
+
+// Función compartida para registrar herramientas
+function registerTools(server: McpServer) {
+    server.tool(
+        'optimize-sql',
+        { query: z.string().describe('SQL query to optimize') },
+        async ({ query }) => {
+            const prompt = `You are a database expert. Optimize this SQL query for performance and explain why. Be concise: ${query}`;
+            const text = await generateWithFallback(prompt);
+            return { content: [{ type: 'text', text: `🔍 Optimization Report:\n\n${text}` }] };
+        }
+    );
+
+    server.tool(
+        'security-audit',
+        { query: z.string().describe('SQL query to audit for security') },
+        async ({ query }) => {
+            const prompt = `You are a cybersecurity expert. Perform a deep security audit on this SQL query. Detect SQL injection, sensitive data leaks, or risky patterns. Be professional and concise: ${query}`;
+            const text = await generateWithFallback(prompt);
+            return { content: [{ type: 'text', text: `🛡️ PREMIUM Security Audit:\n\n${text}` }] };
+        }
+    );
+
+    server.tool(
+        'audit-logs',
+        { logData: z.string().describe('Log data to analyze') },
+        async ({ logData }) => {
+            const prompt = `Analyze these server logs for error patterns or suspicious activity: ${logData}`;
+            const text = await generateWithFallback(prompt);
+            return { content: [{ type: 'text', text: `📋 Log Audit Report:\n\n${text}` }] };
+        }
+    );
+
+    server.tool(
+        'generate-report',
+        { metrics: z.object({}).describe('Metrics object to summarize') },
+        async ({ metrics }) => {
+            const prompt = `Generate an executive database health report based on these metrics: ${JSON.stringify(metrics)}`;
+            const text = await generateWithFallback(prompt);
+            return { content: [{ type: 'text', text: `📊 Executive Report:\n\n${text}` }] };
+        }
+    );
+}
 
 const app = express();
 app.use(express.json());
 app.use(express.static('public')); // Servir el logo y otros estáticos
 
 const RECEIVER_ADDRESS = process.env.WALLET_ADDRESS;
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyDTsNK9Y7vPcecZTCTOpmbCCwEZT-YhKYc';
+const GEMINI_API_KEY = (process.env.GEMINI_API_KEY || '').trim();
 
-// Inicializar Gemini
+// Inicializar Google AI (con comprobación de seguridad y limpieza)
+if (!GEMINI_API_KEY) {
+    console.error("❌ ERROR: GEMINI_API_KEY no configurada. Revisa tus variables de entorno.");
+} else {
+    console.error(`🔑 API Key detectada (Inicia con: ${GEMINI_API_KEY.substring(0, 5)}...)`);
+}
+
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 // Cliente Blockchain para ver ganancias
 const publicClient = createPublicClient({
@@ -45,54 +129,10 @@ const handleConnection = async (req: any, res: any) => {
     }
 
     try {
-        // CREAR UNA INSTANCIA NUEVA POR CADA CONEXIÓN (Estabilidad Total)
         const server = new McpServer({ name: 'GovernAgent', version: '1.0.0' });
+        registerTools(server);
 
-        // Registrar las herramientas en esta instancia
-        server.tool(
-            'optimize-sql',
-            { query: z.string().describe('SQL query to optimize') },
-            async ({ query }) => {
-                const prompt = `You are a database expert. Optimize this SQL query for performance and explain why. Be concise: ${query}`;
-                const result = await model.generateContent(prompt);
-                return { content: [{ type: 'text', text: `🔍 Optimization Report:\n\n${result.response.text()}` }] };
-            }
-        );
-
-        server.tool(
-            'security-audit',
-            { query: z.string().describe('SQL query to audit for security') },
-            async ({ query }) => {
-                const prompt = `You are a cybersecurity expert. Perform a deep security audit on this SQL query. Detect SQL injection, sensitive data leaks, or risky patterns. Be professional and concise: ${query}`;
-                const result = await model.generateContent(prompt);
-                return { content: [{ type: 'text', text: `🛡️ PREMIUM Security Audit:\n\n${result.response.text()}` }] };
-            }
-        );
-
-        server.tool(
-            'audit-logs',
-            { logData: z.string().describe('Log data to analyze') },
-            async ({ logData }) => {
-                const prompt = `Analyze these server logs for error patterns or suspicious activity: ${logData}`;
-                const result = await model.generateContent(prompt);
-                return { content: [{ type: 'text', text: `📋 Log Audit Report:\n\n${result.response.text()}` }] };
-            }
-        );
-
-        server.tool(
-            'generate-report',
-            { metrics: z.object({}).describe('Metrics object to summarize') },
-            async ({ metrics }) => {
-                const prompt = `Generate an executive database health report based on these metrics: ${JSON.stringify(metrics)}`;
-                const result = await model.generateContent(prompt);
-                return { content: [{ type: 'text', text: `📊 Executive Report:\n\n${result.response.text()}` }] };
-            }
-        );
-
-        // Crear el transporte con cobro
         const transport = makePaymentAwareServerTransport(RECEIVER_ADDRESS, TOOL_PRICES);
-
-        // Conectar y procesar
         await server.connect(transport);
         await transport.handleRequest(req, res);
     } catch (err: any) {
@@ -207,7 +247,17 @@ app.get('/', (req, res) => {
     res.send('<h1>GovernAgent (v13.0) 🧠</h1><div style="text-align:center"><img src="/logo.png" style="width:150px; border-radius:50%; box-shadow: 0 0 30px rgba(255,255,255,0.2); margin-top:20px;"></div><p>Intelligent MCP Server Live. Visit <a href="/dashboard" style="color:#38bdf8">/dashboard</a> to see earnings.</p>');
 });
 
-const PORT = parseInt(process.env.PORT || '10000');
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🤖 GoverAgent v13.0 (Gemini Powered) listo en puerto ${PORT}`);
-});
+const PORT = process.env.PORT;
+
+// Si no hay PORT, o si el puerto es 3000 (común en el inspector local), forzamos STDIO
+if (PORT && PORT !== '3000') {
+    app.listen(parseInt(PORT), '0.0.0.0', () => {
+        console.error(`🤖 GoverAgent v13.0 (Web/SSE) listo en puerto ${PORT}`);
+    });
+} else {
+    const server = new McpServer({ name: 'GovernAgent', version: '1.0.0' });
+    registerTools(server);
+    const transport = new StdioServerTransport();
+    server.connect(transport).catch(console.error);
+    console.error(`🛡️ GoverAgent v13.0 (Inspector/STDIO) activo.`);
+}
