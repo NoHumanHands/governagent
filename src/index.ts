@@ -41,7 +41,7 @@ async function generateWithFallback(prompt: string) {
 
     try {
         const response = await openai.chat.completions.create({
-            model: "o4-mini", // El modelo más eficiente y potente de la nueva generación
+            model: "gpt-4o-mini", // El modelo más económico y rentable del mundo
             messages: [{ role: "user", content: prompt }],
             max_tokens: 500
         });
