@@ -41,13 +41,13 @@ async function generateWithFallback(prompt: string) {
 
     try {
         const response = await openai.chat.completions.create({
-            model: "gpt-4o-mini",
+            model: "o4-mini", // El modelo más eficiente y potente de la nueva generación
             messages: [{ role: "user", content: prompt }],
             max_tokens: 500
         });
         return response.choices[0].message.content || "";
     } catch (err: any) {
-        console.error(`❌ Falló OpenAI: ${err.message}`);
+        console.error(`❌ Falló OpenAI o4-mini: ${err.message}`);
     }
 
     console.error("🚨 OpenAI falló. Activando Respuesta Simulada de Emergencia.");
