@@ -12,6 +12,23 @@ import { fileURLToPath } from 'url';
 
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// --- FILTRO CRÍTICO PARA INSPECTOR (STDIO) ---
+if (!process.env.PORT) {
+    const originalWrite = process.stdout.write.bind(process.stdout);
+    // @ts-ignore
+    process.stdout.write = (chunk, encoding, callback) => {
+        const str = typeof chunk === 'string' ? chunk : chunk.toString();
+        if (str.trim().startsWith('{') || str.trim().startsWith('[')) {
+            return originalWrite(chunk, encoding, callback);
+        }
+        return process.stderr.write(chunk, encoding, callback);
+    };
+}
+
+config();
+
 // Función para generar contenido con fallback y simulador de emergencia
 async function generateWithFallback(prompt: string) {
     const key = (process.env.OPENAI_API_KEY || '').trim();
